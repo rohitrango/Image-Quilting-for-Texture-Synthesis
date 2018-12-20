@@ -113,7 +113,7 @@ def VerticalOverlap(im1, im2, blocksize, overlap):
 	'''
 	Horizontal overlap between im1 (left) and im2 (right)
 	'''
-	im1Rot = np.rot90(im1, 3)
+	im1Rot = np.rot90(im1)
 	im2Rot = np.rot90(im2)
 
 	mask, minVal = HorizontalOverlap(im1Rot, im2Rot, blocksize, overlap)
