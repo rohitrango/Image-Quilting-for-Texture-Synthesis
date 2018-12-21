@@ -4,6 +4,8 @@ import cv2
 from matplotlib import pyplot as plt
 from math import ceil
 
+ErrorCombinationFunc = np.add
+
 def generateTextureMap(imageBlocks, blocksize, overlap, minCutH, minCutV, errH, errV, outH, outW, tolerance):
 	nH = int(ceil((outH - blocksize)*1.0/(blocksize - overlap)))
 	nW = int(ceil((outW - blocksize)*1.0/(blocksize - overlap)))
@@ -32,11 +34,7 @@ def generateTextureMap(imageBlocks, blocksize, overlap, minCutH, minCutV, errH, 
 		# Place that block using minCut from minCutH
 		blockIdxMap[0, i+1] = idxJ
 		placeBlock = imageBlocks[idxJ]
-		textureMap[:blocksize, (blkIdx+overlap):(blkIdx+blocksize)] = placeBlock[:, overlap:]
-		# print(textureMap[:blocksize, (blkIdx):(blkIdx+overlap)].shape)
-		# print(minCutH[idxI, idxJ].shape)
-		# print(placeBlock[:, :overlap].shape)
-		textureMap[:blocksize, (blkIdx):(blkIdx+overlap)] = textureMap[:blocksize, (blkIdx):(blkIdx+overlap)]*minCutH[idxI, idxJ][:, :, None] + placeBlock[:, :overlap]*(1 - minCutH[idxI, idxJ][:, :, None])
+		textureMap[:blocksize, (blkIdx):(blkIdx+blocksize)] = textureMap[:blocksize, (blkIdx):(blkIdx+blocksize)]*minCutH[idxI, idxJ][:, :, None] + placeBlock*(1 - minCutH[idxI, idxJ][:, :, None])
 
 
 	# Fill the first column
@@ -52,20 +50,34 @@ def generateTextureMap(imageBlocks, blocksize, overlap, minCutH, minCutV, errH, 
 		# Place that block using minCut from minCutH
 		blockIdxMap[i+1, 0] = idxJ
 		placeBlock = imageBlocks[idxJ]
-		textureMap[(blkIdx+overlap):(blkIdx+blocksize), :blocksize] = placeBlock[overlap:, :]
-		# print(textureMap[:blocksize, (blkIdx):(blkIdx+overlap)].shape)
-		# print(minCutH[idxI, idxJ].shape)
-		# print(placeBlock[:, :overlap].shape)
-		textureMap[(blkIdx):(blkIdx+overlap), :blocksize] = textureMap[(blkIdx):(blkIdx+overlap), :blocksize]*minCutV[idxI, idxJ][:, :, None] + placeBlock[:overlap, :]*(1 - minCutV[idxI, idxJ][:, :, None])
+		textureMap[(blkIdx):(blkIdx+blocksize), :blocksize] = textureMap[(blkIdx):(blkIdx+blocksize), :blocksize]*minCutV[idxI, idxJ][:, :, None] + placeBlock*(1 - minCutV[idxI, idxJ][:, :, None])
 
 	# Fill in the other rows and columns
-	for i, blkIdx in enumerate(range((blocksize-overlap), textureMap.shape[0]-overlap, (blocksize-overlap))):
-		for j, blkIdx in enumerate(range((blocksize-overlap), textureMap.shape[1]-overlap, (blocksize-overlap))):
-			## Fill the rest of entries
-			pass
+	for i in range(1, nH+1):
+		for j in range(1, nW+1):
+			# Choose the starting index for the texture placement
+			blkIndexI = i*(blocksize-overlap)
+			blkIndexJ = j*(blocksize-overlap)
+			# Find the left and top block, and the min errors independently
+			idxH = blockIdxMap[i, j-1]
+			idxV = blockIdxMap[i-1, j]
+			# Find errors and use a function
+			err1 = errH[idxH, :]
+			err2 = errV[idxV, :]
+			# Find err = max(err1, err2)
+			err = ErrorCombinationFunc(err1, err2)
+			minerr = err.min()
+			# Index of placed block
+			idxPlaced = np.where((err <= (1.0 + tolerance)*minerr))[0]
+			idxPlaced = np.random.choice(idxPlaced)
+			# Place that block using minCut 
+			blockIdxMap[i, j] = idxPlaced
+			placeBlock = imageBlocks[idxPlaced]
+			# Generate mask
+			mask = np.maximum(minCutV[idxV, idxPlaced], minCutH[idxH, idxPlaced])
+			textureMap[(blkIndexI):(blkIndexI+blocksize), (blkIndexJ):(blkIndexJ+blocksize)] = textureMap[(blkIndexI):(blkIndexI+blocksize), (blkIndexJ):(blkIndexJ+blocksize)]*mask[:, :, None] + placeBlock*(1 - mask[:, :, None])
 
-
-
-	plt.imshow(textureMap.astype(np.uint8))
+	# print(textureMap.max(), textureMap.min())
+	plt.imshow(textureMap)
 	plt.show()
 	return textureMap

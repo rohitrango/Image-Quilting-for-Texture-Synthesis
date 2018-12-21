@@ -44,8 +44,8 @@ def findMinCut(imageBlocks, blocksize, overlap):
 		mincutVErr : error value for vertical
 	'''
 	N = len(imageBlocks)
-	minCutH = np.zeros((N, N, blocksize, overlap))
-	minCutV = np.zeros((N, N, overlap, blocksize))
+	minCutH = np.zeros((N, N, blocksize, blocksize))
+	minCutV = np.zeros((N, N, blocksize, blocksize))
 
 	minCutHErr = np.zeros((N, N))
 	minCutVErr = np.zeros((N, N))
@@ -100,9 +100,9 @@ def HorizontalOverlap(im1, im2, blocksize, overlap):
 		path.append(minArg)
 	# Reverse to find full path
 	path = path[::-1]
-	mask = np.zeros((blocksize, overlap))
+	mask = np.zeros((blocksize, blocksize))
 	for i in range(len(path)):
-		mask[i, :path[i]] = 1
+		mask[i, :path[i]+1] = 1
 
 	# plt.imshow(mask)
 	# plt.show()

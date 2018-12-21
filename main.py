@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
 	# Get all blocks
 	image = cv2.imread(path)
-	image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+	image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)/255.0
 	print("Image size: ({}, {})".format(*image.shape[:2]))
 
 	# Find all blocks using a raster scan
