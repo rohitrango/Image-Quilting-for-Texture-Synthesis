@@ -28,7 +28,7 @@ if __name__ == "__main__":
 	overlap = args.overlap
 	# Set overlap to 1/5th of block size
 	if overlap < 0:
-		overlap = int(block_size/5)
+		overlap = int(block_size/6)
 
 	# Get all blocks
 	image = cv2.imread(path)

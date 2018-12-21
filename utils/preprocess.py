@@ -71,7 +71,7 @@ def HorizontalOverlap(im1, im2, blocksize, overlap):
 	'''
 	im1Part = im1[:, -overlap:]
 	im2Part = im2[:, :overlap]
-	err = ((im1Part - im2Part)**2).mean(2)
+	err = ((im1Part - im2Part)**2).mean(2)	# Done make square root
 
 	# maintain minIndex for 2nd row onwards and 
 	minIndex = []
