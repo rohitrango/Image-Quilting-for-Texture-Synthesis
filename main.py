@@ -11,7 +11,7 @@ from math import ceil
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--image_path", required=True, type=str, help="path of image you want to quilt")
 parser.add_argument("-b", "--block_size", type=int, default=20, help="block size in pixels")
-parser.add_argument("-o", "--overlap", type=int, default=-1, help="overlap size in pixels (defaults to 1/5th of block size)")
+parser.add_argument("-o", "--overlap", type=int, default=1.0/6, help="overlap size in pixels (defaults to 1/6th of block size)")
 parser.add_argument("-s", "--scale", type=float, default=4, help="Scaling w.r.t. to image size")
 parser.add_argument("-n", "--num_outputs", type=int, default=1, help="number of output textures required")
 parser.add_argument("-f", "--output_file", type=str, default="output{}.png", help="output file name")
@@ -26,9 +26,11 @@ if __name__ == "__main__":
 	block_size = args.block_size
 	scale = args.scale
 	overlap = args.overlap
-	# Set overlap to 1/5th of block size
-	if overlap < 0:
-		overlap = int(block_size/6)
+	# Set overlap to 1/6th of block size
+	if overlap >= 0:
+		overlap = int(block_size*args.overlap)
+	else:
+		overlap = int(block_size/6.0)
 
 	# Get all blocks
 	image = cv2.imread(path)

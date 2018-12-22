@@ -5,25 +5,27 @@ from matplotlib import pyplot as plt
 
 inf = np.float('inf')
 
-def rasterScan(image, blocksize):
+def rasterScan(image, blocksize, step=None):
 	'''
 	Perform raster scan for image with squared block size "b"
 	- If block size is not divisible by image size, then take all except last block
 	- And for the last block, take the block from the other end
 	'''
 	block_list = []
+	if step is None:
+		step = blocksize
 
 	H, W = image.shape[:2]
-	Y = range(0, H, blocksize)
-	X = range(0, W, blocksize)
-	if H%blocksize != 0:
-		Y[-1] = H - blocksize
-	if W%blocksize != 0:
-		X[-1] = W - blocksize
+	Y = range(0, H, step)
+	X = range(0, W, step)
+	if H%step != 0:
+		Y = Y[:-1]
+	if W%step != 0:
+		X = X[:-1]
 
 	for y in Y:
 		for x in X:
-			block_list.append(image[y:y+blocksize, x:x+blocksize, :])
+			block_list.append(image[y:y+step, x:x+step, :])
 
 	print("Created {} blocks.".format(len(block_list)))
 	return block_list
