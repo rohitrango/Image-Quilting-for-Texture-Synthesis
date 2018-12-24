@@ -1,0 +1,1 @@
+for i in {1..20..1}; do python main.py -i textures/t20.png -s 2 -b 60 -p 0 -f results/t20.png; done
